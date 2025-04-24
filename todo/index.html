@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+    <head>
+           
+    </head>
+
+    <body>
+        <input id="title" type="text" 
+                placeholder="title"> <br></br>
+        <input id="description" type="text" 
+            placeholder="description"> <br></br>
+        <button onclick="addTodo()">Add</button>
+        <div id="container">
+
+        </div>
+
+        
+    </body>
+
+    <script>
+        
+        let globalId = 0;
+        let globalTodos = [];
+        let prevTodos = [];
+
+        function markAsDone(todoId){
+            const parent = document.getElementById(todoId);
+            parent.children[2].innerHTML = `done`;
+        }
+        function deleteTodo(todoId){
+            const parent = document.getElementById(todoId);
+            parent.remove();
+        }
+
+        function updateTodo(todoId, title, description, done){
+            const parent = document.getElementById(todoId);
+            parent.children[1].innerHTML = title;
+            parent.children[2].innerHTML = description;
+            parent.children[3].innerHTML = done ? 'Mark as done' : 'done';
+
+        }
+        function addNewTodo(title, description, id){
+            const parent = document.createElement("div");
+            const childFirst = document.createElement("div");
+            childFirst.innerHTML = title;
+
+            const childSecond = document.createElement("div");
+            childSecond.innerHTML = description;
+
+            const childThird = document.createElement("button");
+            childThird.innerHTML = "Mark As Done";
+
+            childThird.setAttribute("onClick", `markAsDone(${id})`);
+            parent.appendChild(childFirst);
+            parent.appendChild(childSecond);
+            parent.appendChild(childThird);
+            parent.setAttribute("id",id);
+            return parent;
+            
+        }
+        function addTodo(){
+            const title = document.getElementById("title").value;
+            const description = document.getElementById("description").value;
+            const parent = document.getElementById("container");
+            if(title != '' && description != ''){
+                globalId = globalId + 1;
+                globalTodos.push({
+                    "title" : title,
+                    "description": description,
+                    "id": globalId, 
+                    "done": false,
+                });
+            }
+
+            updateState(globalTodos);
+        }
+
+        function updateState(globalTodos){
+            
+
+            const added = [];
+            const updated = [];
+            const deleted = [];
+
+            let p1 = 0;
+            let w1 = 0;
+
+            while(p1 < prevTodos.length && w1 < globalTodos.length){
+                if(prevTodos[p1].id < globalTodos[w1].id){
+                    deleted.push(prevTodos[p1]);
+                    p1++;
+                }
+                else if(prevTodos[p1].id == globalTodos[w1].id){
+                    if(JSON.stringify(prevTodos[p1]) !== JSON.stringify(globalTodos[w1])){
+                        // updateTodo(prevTodos[p1].id, globalTodos[w1].title, globalTodos[w1].description, 0);
+                        updated.push(globalTodos[w1]);
+                    }
+                    p1++;
+                    w1++;
+                }
+            }
+
+            while(w1 < globalTodos.length){
+                added.push(globalTodos[w1]);
+                w1++;
+            }
+
+            added.forEach((todo) => {
+                addNewTodo(todo.title, todo.description, todo.id);
+            });
+
+            deleted.forEach((todo) =>{
+                deleteTodo(todo.id);
+            })
+
+
+            updated.forEach((todo) =>{
+                updateTodo(todo.id, todo.title, description, todo.done);
+            })
+
+            prevTodos = globalTodos;
+        }
+    </script>
+</html>
